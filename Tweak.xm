@@ -31,6 +31,18 @@ static BOOL isEnabled = YES;
 	else %orig;
 }
 
+// Stop CC and NC grabbers from loading
+- (void)_addGrabberViews {
+	if(isEnabled) return;
+	%orig;
+}
+
+// Stop camera grabber from loading
+- (void)_layoutCameraGrabberView {
+	if(isEnabled) return;
+	%orig;
+}
+
 %end
 
 // Hide chevron arrow
