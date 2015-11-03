@@ -3,9 +3,9 @@ Name: NoUnwantedLSStuff
 Depends: mobilesubstrate
 Architecture: iphoneos-arm
 Description: Remove stu text, chevron, & tap bounce
-Maintainer: Sassoty <sassoty@gmail.com>
-Author: Sassoty <sassoty@gmail.com>
+Maintainer: Noah Saso <noahsaso@gmail.com>
+Author: Noah Saso <noahsaso@gmail.com>
 Section: Tweaks
 Depiction: http://beta-repo.sassoty.com/deps.php?pkg=com.sassoty.nounwantedlsstuff
-Version: 0.0.1-8
+Version: 0.0.1-9
 Installed-Size: 152
