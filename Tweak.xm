@@ -12,6 +12,10 @@ static BOOL isEnabled = YES;
 
 %end
 
+@interface SBLockScreenView
+@property (retain, nonatomic) UIView *cameraGrabberView;
+@end
+
 %hook SBLockScreenView
 
 // KILL THE HINT!! (iOS 7)
@@ -37,10 +41,24 @@ static BOOL isEnabled = YES;
 	%orig;
 }
 
-// Stop camera grabber from loading
-- (void)_layoutCameraGrabberView {
-	if(isEnabled) return;
+// Hide camera grabber view
+- (void)startAnimating {
 	%orig;
+	if(!isEnabled) return;
+	if(!self.cameraGrabberView) return;
+	self.cameraGrabberView.alpha = 0;
+}
+- (void)layoutSubviews {
+	%orig;
+	if(!isEnabled) return;
+	if(!self.cameraGrabberView) return;
+	self.cameraGrabberView.alpha = 0;
+}
+- (void)_layoutCameraGrabberView {
+	%orig;
+	if(!isEnabled) return;
+	if(!self.cameraGrabberView) return;
+	self.cameraGrabberView.alpha = 0;
 }
 
 %end
