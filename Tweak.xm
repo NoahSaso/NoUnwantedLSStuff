@@ -1,4 +1,10 @@
+#define prefsID CFSTR("com.sassoty.nounwantedlsstuff")
+
 static BOOL isEnabled = YES;
+static BOOL shouldHideSTUText = YES;
+static BOOL shouldHideChevron = YES;
+static BOOL shouldHideGrabbers = YES;
+static NSString *stuText = @"slide to unlock";
 
 %hook SBLockScreenBounceAnimator
 
@@ -25,41 +31,43 @@ static BOOL isEnabled = YES;
 
 // Change because there is no more sliding (idk some lower versions have this animated thing)
 - (void)setCustomSlideToUnlockText:(id)arg1 animated:(BOOL)arg2 {
-	if(isEnabled) %orig(@"", arg2);
+	if(isEnabled) %orig((shouldHideSTUText ? @"" : stuText), arg2);
 	else %orig;
 }
 
 // Change because there is no more sliding
 - (void)setCustomSlideToUnlockText:(id)arg1 {
-	if(isEnabled) %orig(@"");
+	if(isEnabled) %orig((shouldHideSTUText ? @"" : stuText));
 	else %orig;
 }
 
 // Stop CC and NC grabbers from loading
 - (void)_addGrabberViews {
-	if(isEnabled) return;
+	if(isEnabled && shouldHideGrabbers) return;
 	%orig;
 }
 
+/* HACKY AND BARELY WORKS
 // Hide camera grabber view
 - (void)startAnimating {
 	%orig;
-	if(!isEnabled) return;
+	if(!isEnabled || !shouldHideCamera) return;
 	if(!self.cameraGrabberView) return;
 	self.cameraGrabberView.alpha = 0;
 }
 - (void)layoutSubviews {
 	%orig;
-	if(!isEnabled) return;
+	if(!isEnabled || !shouldHideCamera) return;
 	if(!self.cameraGrabberView) return;
 	self.cameraGrabberView.alpha = 0;
 }
 - (void)_layoutCameraGrabberView {
 	%orig;
-	if(!isEnabled) return;
+	if(!isEnabled || !shouldHideCamera) return;
 	if(!self.cameraGrabberView) return;
 	self.cameraGrabberView.alpha = 0;
 }
+*/
 
 %end
 
@@ -69,11 +77,11 @@ static BOOL isEnabled = YES;
 %hook SBFGlintyStringView
 
 - (int)chevronStyle {  
-    return (isEnabled ? 0 : %orig);
+    return (isEnabled && shouldHideChevron ? 0 : %orig);
 }
 
 - (void)setChevronStyle:(int)style {
-	if(isEnabled) %orig(0);
+	if(isEnabled && shouldHideChevron) %orig(0);
 	else %orig;
 }
 
@@ -82,16 +90,25 @@ static BOOL isEnabled = YES;
 %hook _UIGlintyStringView
 
 - (id)chevron {
-    return (isEnabled ? nil : %orig);
+    return (isEnabled && shouldHideChevron ? nil : %orig);
 }
 
 %end
 
 static void reloadPrefs() {
-	CFPreferencesAppSynchronize(CFSTR("com.sassoty.nounwantedlsstuff"));
-	Boolean exists = NO;
-	Boolean isEnabledRef = CFPreferencesGetAppBooleanValue(CFSTR("Enabled"), CFSTR("com.sassoty.nounwantedlsstuff"), &exists);
-	isEnabled = (exists ? isEnabledRef : YES);
+	CFPreferencesAppSynchronize(prefsID);
+	NSDictionary *prefs = nil;
+	CFArrayRef keyList = CFPreferencesCopyKeyList(prefsID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	if(keyList) {
+		prefs = (NSDictionary *)CFPreferencesCopyMultiple(keyList, prefsID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+		if(!prefs) prefs = [NSDictionary new];
+		CFRelease(keyList);
+	}
+	isEnabled = prefs[@"Enabled"] ? [prefs[@"Enabled"] boolValue] : YES;
+	shouldHideSTUText = prefs[@"HideSTU"] ? [prefs[@"HideSTU"] boolValue] : YES;
+	shouldHideChevron = prefs[@"HideChevron"] ? [prefs[@"HideChevron"] boolValue] : YES;
+	shouldHideGrabbers = prefs[@"HideGrabbers"] ? [prefs[@"HideGrabbers"] boolValue] : YES;
+	stuText = prefs[@"STUText"] ?: @"slide to unlock";
 }
 
 %ctor {
