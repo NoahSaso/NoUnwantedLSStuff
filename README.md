@@ -5,4 +5,4 @@ I use with LockPlus to make the themes look smoother and more fluid.
 
 Uses code from https://github.com/codyd51/NoSTUArrow to hide the chevron (arrow).
 
-This tweak is also found on my repo: http://repo.sassoty.com
+This tweak is also found on my repo: http://repo.noahsaso.com
